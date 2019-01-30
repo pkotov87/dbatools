@@ -189,6 +189,40 @@ function Connect-SqlInstance {
     }
     #endregion Input Object was a server object
 
+    #region pkotov
+    $server = $null
+    $InvokeCommandSplat = {
+    $ComputerName_pkotov = $args[0]
+    [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.SMO")|Out-Null
+    $server = New-Object Microsoft.SqlServer.Management.Smo.Server $ComputerName_pkotov
+    $server.ConnectionContext.ApplicationName = "dbatools PowerShell module - dbatools.io"
+    $server.ConnectionContext.ConnectTimeout = 15
+        Try
+        {
+            $server.ConnectionContext.Connect()            
+        }
+        Catch
+        {}
+        Return $server
+    }
+    $Global:TestPKotov1 = $ConvertedSqlInstance.FullSmoName#Test pkotov
+    $ServerToConnect = $ConvertedSqlInstance.FullSmoName
+    If($ServerToConnect.Contains("\"))
+    {
+        $ServerToConnect = $ServerToConnect.Split("\")[0]
+    }
+    $server = Invoke-Command -ComputerName $ServerToConnect -Credential $SqlCredential -ScriptBlock @InvokeCommandSplat -ArgumentList $ConvertedSqlInstance.FullSmoName -ErrorAction SilentlyContinue
+    If($server -ne $null)
+    {
+        $Global:TestPKotov1 = $server#Test pkotov
+        #Return $server
+    }
+    Else
+    {
+        throw "Cannot connect to $($ConvertedSqlInstance.FullSmoName)"
+    }
+    #endregion pkotov
+    <#Test pkotov
     #region Input Object was anything else
 
     $server = New-Object Microsoft.SqlServer.Management.Smo.Server $ConvertedSqlInstance.FullSmoName
@@ -271,7 +305,7 @@ function Connect-SqlInstance {
             throw $_
         }
     }
-
+    
     if ($MinimumVersion -and $server.VersionMajor) {
         if ($server.versionMajor -lt $MinimumVersion) {
             throw "SQL Server version $MinimumVersion required - $server not supported."
@@ -351,7 +385,7 @@ function Connect-SqlInstance {
             Invoke-TEPPCacheUpdate -ScriptBlock $scriptBlock
         }
     }
-
+    #>#Test pkotov
     if (-not $server.ComputerName) {
         if (-not $server.NetName -or $SqlInstance -match '\.') {
             $parsedcomputername = $ConvertedSqlInstance.ComputerName

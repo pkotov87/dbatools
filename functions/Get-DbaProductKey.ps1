@@ -178,12 +178,13 @@ function Get-DbaProductKey {
 
             # Get Product Keys for all instances on the server.
             foreach ($instanceReg in $registryroot) {
+                $Global:TestPKotov3 = $instanceReg#Test pkotov
                 try {
                     $server = Connect-SqlInstance -SqlInstance $instanceReg.SqlInstance -SqlCredential $SqlCredential -MinimumVersion 10
                 } catch {
                     Stop-Function -Message "Failure" -Category ConnectionError -ErrorRecord $_ -Target $instanceReg.SqlInstance -Continue
                 }
-
+                $Global:TestPKotov2 = $server#Test pkotov
                 $servicePack = $server.ProductLevel
                 $versionMajor = $server.VersionMajor
                 Write-Message -Level Debug -Message "$instance $instanceName version is $($server.VersionMajor)"
