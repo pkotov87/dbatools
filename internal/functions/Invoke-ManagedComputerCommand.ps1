@@ -49,7 +49,8 @@ function Invoke-ManagedComputerCommand {
     [scriptblock]$setupScriptBlock = {
         $ipaddr = $args[$args.GetUpperBound(0)]
 
-        # Just in case we go remote, ensure the assembly is loaded
+        # Just in case we go remote, ensure the assembly is loaded. Wenn SQL Server 2014 and 13.0.0.0__89845dcd8080cc91 -> Failed!!!
+	# Find right library
 		<#pkotov 
         [void][System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SqlServer.SqlWmiManagement')
         $wmi = New-Object Microsoft.SqlServer.Management.Smo.Wmi.ManagedComputer $ipaddr
