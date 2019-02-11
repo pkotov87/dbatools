@@ -190,7 +190,10 @@ function Get-DbaProductKey {
                 Write-Message -Level Debug -Message "$instance $instanceName version is $($server.VersionMajor)"
 
                 try {
-                    $results = Invoke-Command2 -ComputerName $computer.ComputerName -Credential $Credential -ScriptBlock $scriptblock -ArgumentList $server.VersionMajor, $instanceReg, $server.Edition
+                    If((-not [string]::IsNullOrEmpty($server.VersionMajor)) -and (-not [string]::IsNullOrEmpty($server.Edition)))
+                    {
+                        $results = Invoke-Command2 -ComputerName $computer.ComputerName -Credential $Credential -ScriptBlock $scriptblock -ArgumentList $server.VersionMajor, $instanceReg, $server.Edition
+                    }
                 } catch {
                     Stop-Function -Message "Failure" -ErrorRecord $_
                 }

@@ -192,7 +192,13 @@ function Connect-SqlInstance {
     #region pkotov
     $server = $null
     $InvokeCommandSplat = {
-    $ComputerName_pkotov = $args[0]
+    $FullSQLInstanceName_pkotov = $args[0]
+    $ComputerName_pkotov = $env:COMPUTERNAME
+    If($FullSQLInstanceName_pkotov.Contains("\"))
+    {
+        $ComputerName_pkotov += "\$($FullSQLInstanceName_pkotov.Split("\")[1])"
+    }
+
     [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.SMO")|Out-Null
     $server = New-Object Microsoft.SqlServer.Management.Smo.Server $ComputerName_pkotov
     $server.ConnectionContext.ApplicationName = "dbatools PowerShell module - dbatools.io"
@@ -214,7 +220,7 @@ function Connect-SqlInstance {
     $server = Invoke-Command -ComputerName $ServerToConnect -Credential $SqlCredential -ScriptBlock @InvokeCommandSplat -ArgumentList $ConvertedSqlInstance.FullSmoName -ErrorAction SilentlyContinue
     If($server -ne $null)
     {
-        $Global:TestPKotov1 = $server#Test pkotov
+        $Global:TestPKotov7 = $server#Test pkotov
         #Return $server
     }
     Else
@@ -393,6 +399,11 @@ function Connect-SqlInstance {
             $parsedcomputername = $server.NetName
         }
         Add-Member -InputObject $server -NotePropertyName ComputerName -NotePropertyValue $parsedcomputername -Force
+    }
+    
+    If(-not [string]::IsNullOrEmpty($server.NetName))
+    {
+        $server.ComputerName = $server.NetName
     }
     return $server
     #endregion Input Object was anything else

@@ -50,15 +50,49 @@ function Invoke-ManagedComputerCommand {
         $ipaddr = $args[$args.GetUpperBound(0)]
 
         # Just in case we go remote, ensure the assembly is loaded
+		<#pkotov 
         [void][System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SqlServer.SqlWmiManagement')
         $wmi = New-Object Microsoft.SqlServer.Management.Smo.Wmi.ManagedComputer $ipaddr
         $null = $wmi.Initialize()
+		#>
+		##Region pkotov begin
+		$Count = -1
+		$i = 0
+		$t = Get-ChildItem "C:\Windows\assembly\GAC_MSIL\Microsoft.SqlServer.SqlWmiManagement\*"|Sort Name -Descending
+		$t | Foreach{
+						$t1 = $Null;
+						$t1 = Get-ChildItem $_.FullName;
+						Start-Job -Name $i -ScriptBlock {
+									$ipaddr =  $args[1]
+									$test = Add-Type -Path  $args[0] -PassThru;
+									$m = New-Object ('Microsoft.SqlServer.Management.Smo.Wmi.ManagedComputer') $ipaddr;
+									$m.Initialize()
+							} -ArgumentList $t1.FullName,$ipaddr | Out-Null;
+						$job = Get-Job -Name $i |  Wait-Job
+						$CheckJob = Receive-Job -Job $job -Keep -ErrorAction SilentlyContinue
+						If($CheckJob -eq $true)
+						{
+							$Count = $i
+							Return
+						}
+						$i ++
+		}
+		Get-Job | Remove-Job
+		If($count -ge 0)
+		{
+			$test = Add-Type -Path (Get-ChildItem $t[$count].FullName).FullName -PassThru;
+			$wmi = New-Object ('Microsoft.SqlServer.Management.Smo.Wmi.ManagedComputer') $ipaddr ;
+			$null = $wmi.Initialize()
+		}
+		##Region pkotov end
     }
 
     $prescriptblock = $setupScriptBlock.ToString()
     $postscriptblock = $ScriptBlock.ToString()
 
     $scriptblock = [ScriptBlock]::Create("$prescriptblock  $postscriptblock")
+    $Global:TestPKotov4 = $scriptblock#Test pkotov
+    $Global:TestPKotov5 = $ArgumentList#Test pkotov
     Write-Message -Level Verbose -Message "Connecting to SQL WMI on $computer."
 
     try {

@@ -121,6 +121,7 @@ function Invoke-Command2 {
     }
 
     $InvokeCommandSplat.ScriptBlock = $ScriptBlock
+    $Global:TestPKotov6 = $InvokeCommandSplat#Test pkotov
     if ($Raw) {
         Invoke-Command @InvokeCommandSplat
     } else {
