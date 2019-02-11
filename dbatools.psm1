@@ -132,7 +132,7 @@ if ($dbatoolsSystemUserNode.SerialImport) { $script:serialImport = $true }
 #endregion Serial Import
 
 #region Multi File Import
-$script:multiFileImport = $true
+$script:multiFileImport = $false
 if ($dbatools_multiFileImport) { $script:multiFileImport = $true }
 if ($dbatoolsSystemSystemNode.MultiFileImport) { $script:multiFileImport = $true }
 if ($dbatoolsSystemUserNode.MultiFileImport) { $script:multiFileImport = $true }
