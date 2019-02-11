@@ -198,7 +198,6 @@ function Connect-SqlInstance {
     {
         $ComputerName_pkotov += "\$($FullSQLInstanceName_pkotov.Split("\")[1])"
     }
-
     [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.SMO")|Out-Null
     $server = New-Object Microsoft.SqlServer.Management.Smo.Server $ComputerName_pkotov
     $server.ConnectionContext.ApplicationName = "dbatools PowerShell module - dbatools.io"
